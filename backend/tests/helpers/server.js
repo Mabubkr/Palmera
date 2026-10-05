@@ -16,6 +16,7 @@ async function startServer({ demo = true } = {}) {
     PORT: String(port),
     SEED_DEMO_DATA: demo ? 'true' : 'false',
     DEMO_SNAPSHOT: 'false', // tests use the small built-in sample farm
+    NDVI_AUTO_SYNC: 'false',
     GEMINI_API_KEY: '',
     LOG_RESET_LINKS: 'true'
   };

@@ -179,7 +179,22 @@ async function syncNdvi(opts = {}) {
     const known = new Map(db.all('SELECT * FROM agro_polygons').map(r => [r.plot_id, r]));
     // oldest-synced first, so repeated runs walk through a big farm
     withShape.sort((a, b) => String(known.get(a.plotId)?.last_sync_at || '').localeCompare(String(known.get(b.plotId)?.last_sync_at || '')));
-    const summary = { success: true, plotsTotal: geoms.length, plotsWithShape: withShape.length, processed: 0, polygonsCreated: 0, observationsAdded: 0, skipped: [], errors: [] };
+    const summary = { success: true, plotsTotal: geoms.length, plotsWithShape: withShape.length, processed: 0, polygonsCreated: 0, polygonsReused: 0, observationsAdded: 0, emptyHistory: 0, skipped: [], errors: [] };
+    // Polygons already registered with the provider (by name). A free server forgets its local table
+    // on every restart; re-using the provider's polygon keeps its imagery history (a new polygon on the
+    // free plan waits a few days for its first images).
+    let remote = new Map();
+    try {
+      const list = await agroCall('/polygons');
+      (Array.isArray(list) ? list : []).forEach(pg => {
+        const m = /^PalmTrace (.+)$/.exec(String(pg.name || ''));
+        if (!m) return;
+        const prev = remote.get(m[1]);
+        if (!prev || Number(pg.created_at || 0) < Number(prev.created_at || 0)) remote.set(m[1], pg); // oldest = longest history
+      });
+    } catch (err) {
+      if (err.status === 401 || err.code === 'NO_KEY') return { success: false, error: err.message };
+    }
     const nowSec = Math.floor(Date.now() / 1000);
     const insert = db.db.prepare(`INSERT OR IGNORE INTO ndvi_observations (plot_id, dt, source, cloud, coverage, mean, median, min, max, std, p25, p75, num)
                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
@@ -188,6 +203,14 @@ async function syncNdvi(opts = {}) {
       if (g.areaHa > MAX_HA) { summary.skipped.push({ plotId: g.plotId, reason: 'أكبر من الحد الأقصى للخدمة (3000 هكتار)' }); continue; }
       try {
         let row = known.get(g.plotId);
+        const existing = remote.get(g.plotId);
+        if (!row && existing && existing.id) {
+          db.db.prepare(`INSERT INTO agro_polygons (plot_id, polygon_id, area_ha, geom_hash) VALUES (?, ?, ?, ?)
+                         ON CONFLICT(plot_id) DO UPDATE SET polygon_id = excluded.polygon_id, area_ha = excluded.area_ha, geom_hash = excluded.geom_hash`)
+            .run(g.plotId, String(existing.id), Number(existing.area) || g.areaHa, g.hash);
+          row = { plot_id: g.plotId, polygon_id: String(existing.id), geom_hash: g.hash };
+          summary.polygonsReused++;
+        }
         if (!row || row.geom_hash !== g.hash) {
           if (row) { try { await agroCall(`/polygons/${encodeURIComponent(row.polygon_id)}`, { method: 'DELETE' }); } catch {} }
           const coords = g.ring.map(p => [p[1], p[0]]); // GeoJSON is [lng, lat]
@@ -216,6 +239,7 @@ async function syncNdvi(opts = {}) {
           added += r.changes || 0;
         });
         db.db.prepare('UPDATE agro_polygons SET last_sync_at = CURRENT_TIMESTAMP WHERE plot_id = ?').run(g.plotId);
+        if (!Array.isArray(hist) || !hist.length) { if (!last) summary.emptyHistory++; }
         summary.observationsAdded += added;
         summary.processed++;
       } catch (err) {
@@ -226,8 +250,15 @@ async function syncNdvi(opts = {}) {
     }
     if (withShape.length > maxPlots) summary.remaining = withShape.length - maxPlots;
     summary.noShape = geoms.length - withShape.length;
-    try { db.db.prepare(`INSERT INTO system_settings (key, value, updated_at) VALUES ('ndvi_last_sync', ?, CURRENT_TIMESTAMP)
-                         ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP`).run(JSON.stringify(new Date().toISOString())); } catch {}
+    const put = (k, v) => { try { db.db.prepare(`INSERT INTO system_settings (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)
+                         ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP`).run(k, JSON.stringify(v)); } catch {} };
+    put('ndvi_last_sync', new Date().toISOString());
+    put('ndvi_last_result', {
+      at: new Date().toISOString(), success: summary.success, error: summary.error || null,
+      processed: summary.processed, polygonsCreated: summary.polygonsCreated, polygonsReused: summary.polygonsReused,
+      observationsAdded: summary.observationsAdded, emptyHistory: summary.emptyHistory,
+      skipped: summary.skipped.length, errors: summary.errors.slice(0, 5)
+    });
     return summary;
   })();
   syncRunning = run;
@@ -278,6 +309,7 @@ function ndviSummary(plotFilter = null) {
     success: true,
     configured: Boolean(agroKey()),
     lastSync: settingRaw('ndvi_last_sync') || null,
+    lastResult: settingRaw('ndvi_last_result') || null,
     farmMedian: median,
     plots
   };

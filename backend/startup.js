@@ -27,6 +27,19 @@ function runStartupTasks() {
   require('./migrations/versioned/006_palms_row_version').up(db.db);
   require('./migrations/versioned/007_operations_row_version').up(db.db);
 
+  // Satellite readings: a fresh server (e.g. the free demo after it wakes up) fetches them by itself
+  try {
+    const Agro = require('./lib/agro');
+    const hasObs = db.get('SELECT COUNT(*) AS n FROM ndvi_observations')?.n > 0;
+    if (Agro.status().satellite.configured && !hasObs && process.env.NDVI_AUTO_SYNC !== 'false') {
+      setTimeout(() => {
+        Agro.syncNdvi({ maxPlots: 40 })
+          .then(r => console.log(`[ndvi] start-up sync: ${r.processed || 0} plots, ${r.observationsAdded || 0} images${r.error ? ' — ' + r.error : ''}`))
+          .catch(err => console.warn('[ndvi] start-up sync failed:', err.message));
+      }, 20000).unref();
+    }
+  } catch (err) { console.warn('[ndvi] start-up sync skipped:', err.message); }
+
   // Initialize AgriAI API key: environment (.env) first, then the key saved from the admin settings screen.
   try {
     const row = db.get("SELECT value FROM system_settings WHERE key = 'gemini_api_key' OR key = 'geminiApiKey'");

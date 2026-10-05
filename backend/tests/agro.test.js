@@ -91,3 +91,26 @@ test('investor filter only returns plots in their family', () => {
   const s = Agro.ndviSummary(new Set(['P1A']));
   assert.deepEqual(s.plots.map(p => p.plotId), ['P1']);
 });
+
+test('after a restart (empty local table) the provider polygon is reused, not re-created', async () => {
+  db.db.exec('DELETE FROM agro_polygons; DELETE FROM ndvi_observations;');
+  const calls = [];
+  Agro.setFetch(async (url, opts = {}) => {
+    calls.push({ url, method: opts.method || 'GET' });
+    const ok = j => ({ ok: true, status: 200, text: async () => JSON.stringify(j), json: async () => j });
+    if (/\/polygons\?/.test(url) && (opts.method || 'GET') === 'GET') return ok([
+      { id: 'old-2', name: 'PalmTrace P1', area: 2.3, created_at: 200 },
+      { id: 'old-1', name: 'PalmTrace P1', area: 2.3, created_at: 100 },
+      { id: 'x', name: 'Someone else', area: 9, created_at: 1 }
+    ]);
+    if (url.includes('/ndvi/history')) return ok([]);
+    return { ok: false, status: 500, text: async () => 'unexpected' };
+  });
+  const r = await Agro.syncNdvi({ pauseMs: 0 });
+  assert.equal(r.polygonsReused, 1);
+  assert.equal(r.polygonsCreated, 0);
+  assert.ok(!calls.some(c => c.method === 'POST'), 'no new polygon');
+  assert.ok(calls.some(c => c.url.includes('polyid=old-1')), 'oldest polygon (longest history) is used');
+  assert.equal(r.emptyHistory, 1);
+  assert.equal(Agro.ndviSummary().lastResult.emptyHistory, 1);
+});

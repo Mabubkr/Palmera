@@ -362,7 +362,15 @@
       <div class="card" style="margin-bottom:14px;background:linear-gradient(135deg,#F0FDF4 0%,#E0F2FE 100%);border:1px solid #BAE6FD;border-radius:14px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
         <div style="font-size:12.5px;color:#334155;line-height:1.6">
           <b style="color:#0369A1">🛰️ مصدر البيانات: Sentinel-2 و Landsat-8 عبر AgroMonitoring</b><br>
-          آخر تحديث: <b>${escapeHtml(sinceTxt(data.lastSync))}</b> • آخر صورة صالحة: <b>${escapeHtml(lastPass || "—")}</b> • القراءات اللي فيها سحب أكتر من 30% بتتستبعد تلقائياً
+          آخر تحديث: <b>${escapeHtml(sinceTxt(data.lastSync))}</b> • آخر صورة صالحة: <b>${escapeHtml(lastPass || "—")}</b> • القراءات اللي فيها سحب أكتر من 30% بتتستبعد تلقائياً${(() => {
+            const r = data.lastResult;
+            if (!r) return "";
+            if (r.error) return `<br><span style="color:#B91C1C">آخر محاولة: ${escapeHtml(r.error)}</span>`;
+            const errs = (r.errors || []).length ? ` • <span style="color:#B91C1C">${r.errors.length} أخطاء: ${escapeHtml(r.errors[0].error || "")}</span>` : "";
+            const waiting = !withData.length && r.processed && !r.observationsAdded
+              ? `<br><span style="color:#92400E">⏳ القطع اتسجلت عند خدمة القمر الصناعي، ومنتظرين أول صور. في الباقة المجانية بتوصل خلال أيام قليلة من التسجيل، والنظام بيجيبها لوحده.</span>` : "";
+            return `<br>آخر تحديث: ${r.processed} قطعة • ${r.observationsAdded} صورة جديدة${r.polygonsCreated ? ` • ${r.polygonsCreated} قطعة اتسجلت لأول مرة` : ""}${errs}${waiting}`;
+          })()}
         </div>
         ${canSyncSatellite() ? `<button type="button" class="btn btn-primary" data-act="ai-refresh-ndvi" ${agro.syncing ? "disabled" : ""} style="width:auto !important;padding:7px 16px;font-size:12.5px;font-weight:700;border-radius:8px">${agro.syncing ? "⏳ جاري التحديث… (دقيقة تقريباً)" : "🔄 تحديث من القمر الصناعي"}</button>` : ""}
       </div>`;
