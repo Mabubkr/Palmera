@@ -16,6 +16,7 @@ if errorlevel 1 (
   pause
   exit /b
 )
-start http://localhost:3000
+start "" /b node scripts\open-when-ready.js
+echo    المتصفح هيفتح لوحده أول ما الخادم يجهز...
 node backend\server.js
 pause
