@@ -1,0 +1,109 @@
+{
+  "id": "palmtrace-pwa-app",
+  "name": "نظام إدارة النخيل والفسائل",
+  "short_name": "إدارة النخيل",
+  "description": "النظام المتكامل لإدارة مزارع النخيل والفسائل وأشجار الزيتون والمحاصيل الزراعية",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F4F1EA",
+  "theme_color": "#1B5E20",
+  "lang": "ar",
+  "dir": "rtl",
+  "categories": [
+    "business",
+    "productivity",
+    "utilities"
+  ],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "تسجيل عملية بالصوت",
+      "short_name": "تسجيل صوتي",
+      "description": "افتح الميكروفون وسجّل العملية مباشرة",
+      "url": "/index.html#voice",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "المستثمرون والعقود",
+      "short_name": "المستثمرون",
+      "description": "إدارة المستثمرين والعقود وتخصيص القطع",
+      "url": "/index.html#investors",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "الخريطة التفاعلية",
+      "short_name": "الخريطة",
+      "description": "استعراض الخريطة الجغرافية والقطع",
+      "url": "/index.html#gis",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/screenshot_dashboard_above_the_fold.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "لوحة القيادة والمؤشرات الزراعية"
+    },
+    {
+      "src": "/screenshots/screenshot_bulk_op_mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "العمليات الميدانية على الهاتف"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "name": "palmtrace-enterprise",
+  "version": "3.1.0",
+  "description": "PalmTrace Enterprise Agri-ERP & Precision Farming Platform",
+  "main": "backend/server.js",
+  "private": true,
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "node --watch backend/server.js",
+    "check": "node scripts/check-syntax.js",
+    "reset-admin": "node backend/scripts/reset_admin_password.js",
+    "db:push": "node backend/scripts/migrate_sqlite_to_render_pg.js",
+    "db:pull": "node backend/scripts/pull_from_render_pg.js",
+    "test": "node --test --test-concurrency=1 \"backend/tests/*.test.js\""
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "pg": "^8.23.1",
+    "xlsx": "^0.18.5",
+    "nodemailer": "^6.9.16"
+  }
+}

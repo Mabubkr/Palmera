@@ -1,0 +1,28 @@
+# Render Blueprint: New → Blueprint → pick this repository.
+# Free plan: the server sleeps after ~15 minutes without visitors and its disk is wiped on every
+# restart, so the demo farm is re-created at each start (SEED_DEMO_DATA=true). For data that must
+# survive, use a paid plan with a disk mounted at /var/data and set DATA_DIR=/var/data.
+services:
+  - type: web
+    name: palmera
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm install --omit=dev
+    startCommand: node backend/server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: SEED_DEMO_DATA
+        value: "true"
+      - key: DEMO_PASSWORD
+        sync: false            # the password for all demo accounts — set it in the Render dashboard
+      - key: GEMINI_API_KEY
+        sync: false            # optional: voice fallback, photo diagnosis, agri chat
+      - key: AGROMONITORING_API_KEY
+        sync: false            # optional: real satellite NDVI
+      - key: OPEN_METEO_API_KEY
+        sync: false            # optional: commercial weather licence
+      - key: LOG_RESET_LINKS
+        value: "false"

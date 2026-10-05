@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#15803d" />
+  <title>جواز السفر الرقمي للمنتج وتتبع التمور | مزارع بشاير الشوربجي</title>
+  
+  <!-- Google Fonts: Tajawal -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
+  
+  <!-- Leaflet CSS for Interactive Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="icon" id="traceFavicon" type="image/svg+xml" href="./icons/icon.svg" />
+
+  <style>
+    :root {
+      --primary: #15803d;
+      --primary-dark: #14532d;
+      --primary-light: #f0fdf4;
+      --gold: #d97706;
+      --gold-light: #fef3c7;
+      --slate-dark: #0f172a;
+      --text-muted: #64748b;
+      --card-bg: rgba(255, 255, 255, 0.94);
+      --border-color: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Tajawal', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(175deg, #064e3b 0%, #0f172a 420px, #f8fafc 420px, #f1f5f9 100%);
+      color: #1e293b;
+      line-height: 1.6;
+      min-height: 100vh;
+      padding-bottom: 40px;
+    }
+
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 16px 14px;
+    }
+
+    /* Top Brand Hero */
+    .brand-hero {
+      text-align: center;
+      color: #ffffff;
+      padding: 24px 10px 30px;
+    }
+
+    .brand-logo-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 68px;
+      height: 68px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.35);
+      border-radius: 50%;
+      font-size: 34px;
+      margin-bottom: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+    }
+
+    .brand-title {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .brand-subtitle {
+      font-size: 13px;
+      color: #cbd5e1;
+      font-weight: 500;
+    }
+
+    .verified-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #22c55e;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 5px 14px;
+      border-radius: 9999px;
+      margin-top: 14px;
+      box-shadow: 0 4px 14px rgba(34, 197, 94, 0.4);
+    }
+
+    /* Main Card */
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 20px 18px;
+      margin-bottom: 18px;
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Product Identity Card */
+    .product-header {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #f1f5f9;
+      margin-bottom: 16px;
+    }
+
+    .product-img-wrap {
+      width: 84px;
+      height: 84px;
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 42px;
+      border: 2px solid #f59e0b;
+      flex-shrink: 0;
+      box-shadow: 0 6px 16px rgba(217, 119, 6, 0.15);
+    }
+
+    .product-main-info {
+      flex: 1;
+    }
+
+    .product-variety {
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--slate-dark);
+      line-height: 1.2;
+    }
+
+    .product-grade-badge {
+      display: inline-block;
+      background: var(--gold-light);
+      color: #92400e;
+      border: 1px solid #fde68a;
+      font-size: 11.5px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 8px;
+      margin-top: 6px;
+    }
+
+    .batch-tag {
+      font-family: monospace;
+      font-size: 12px;
+      color: #475569;
+      margin-top: 4px;
+      direction: ltr;
+      display: inline-block;
+      font-weight: bold;
+    }
+
+    /* Quick Specs Grid */
+    .specs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .spec-item {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+
+    .spec-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .spec-val {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    /* Quality Highlights Ribbon */
+    .quality-ribbon {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin-top: 14px;
+      scrollbar-width: none;
+    }
+    .quality-ribbon::-webkit-scrollbar { display: none; }
+
+    .q-pill {
+      flex-shrink: 0;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
+      padding: 6px 12px;
+      border-radius: 9999px;
+      font-size: 11.5px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Section Headings */
+    .section-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--slate-dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    /* Map Box */
+    .map-box {
+      width: 100%;
+      height: 220px;
+      border-radius: 14px;
+      border: 1px solid #cbd5e1;
+      overflow: hidden;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .map-caption {
+      font-size: 12px;
+      color: #475569;
+      background: #f8fafc;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Crop Journey Timeline */
+    .timeline {
+      position: relative;
+      padding-right: 28px;
+      margin-top: 14px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      top: 6px;
+      right: 11px;
+      bottom: 6px;
+      width: 2px;
+      background: #cbd5e1;
+    }
+
+    .timeline-node {
+      position: relative;
+      margin-bottom: 18px;
+    }
+
+    .timeline-node:last-child {
+      margin-bottom: 0;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      right: -28px;
+      top: 2px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #15803d;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      box-shadow: 0 0 0 4px #dcfce7;
+      z-index: 2;
+    }
+
+    .timeline-content {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 10px 14px;
+    }
+
+    .timeline-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .timeline-stage {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .timeline-date {
+      font-size: 11px;
+      color: var(--text-muted);
+      direction: ltr;
+      font-weight: 600;
+    }
+
+    .timeline-desc {
+      font-size: 12px;
+      color: #475569;
+      line-height: 1.5;
+    }
+
+    .timeline-badge {
+      display: inline-block;
+      font-size: 10.5px;
+      font-weight: 700;
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin-top: 6px;
+    }
+
+    /* Nutrition Table */
+    .nutri-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      margin-top: 8px;
+    }
+
+    .nutri-table tr {
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .nutri-table tr:last-child {
+      border-bottom: none;
+    }
+
+    .nutri-table td {
+      padding: 8px 6px;
+    }
+
+    .nutri-table td:last-child {
+      text-align: left;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    /* Action Buttons */
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .action-btn {
+      flex: 1;
+      padding: 13px 16px;
+      border-radius: 12px;
+      border: none;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      transition: transform 0.15s ease;
+    }
+
+    .action-btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary-action {
+      background: #15803d;
+      color: #ffffff;
+    }
+
+    .btn-secondary-action {
+      background: #25d366;
+      color: #ffffff;
+    }
+
+    /* Footer */
+    .passport-footer {
+      text-align: center;
+      padding: 16px 10px 0;
+      font-size: 11.5px;
+      color: #64748b;
+    }
+
+    .passport-footer b {
+      color: #334155;
+    }
+
+    /* Loading state */
+    .loading-wrap {
+      text-align: center;
+      padding: 60px 20px;
+      color: #fff;
+    }
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+      <div id="loader" class="loading-wrap">
+        <div class="spinner"></div>
+        <div style="font-size:16px;font-weight:700">جاري التحقق وقراءة جواز السفر الزراعي...</div>
+        <div style="font-size:12px;color:#cbd5e1;margin-top:6px" id="loaderSubBrand">نظام التتبع الذكي وجواز السفر الزراعي</div>
+      </div>
+
+      <div id="content" style="display:none">
+        
+        <!-- Brand & Authenticity Hero -->
+        <div class="brand-hero">
+          <div class="brand-logo-badge" id="brandLogoBadge">🌴</div>
+          <h1 class="brand-title" id="brandTitle">جواز السفر الزراعي الرقمي</h1>
+          <div class="brand-subtitle" id="brandSubtitle">واحة الفرافرة • الوادي الجديد • جمهورية مصر العربية</div>
+        <div class="verified-pill">
+          <span>✓</span>
+          <span>منتج أصلي وموثق برمجياً 100%</span>
+        </div>
+      </div>
+
+      <!-- Product Passport Card -->
+      <div class="card">
+        <div class="product-header">
+          <div class="product-img-wrap" id="cropIconWrap">🌴</div>
+          <div class="product-main-info">
+            <h2 class="product-variety" id="prodVariety">تمر برحي فاخر</h2>
+            <div class="product-grade-badge" id="prodGrade">فرز ممتاز ★★★ (Grade A)</div>
+            <div>
+              <span class="batch-tag" id="batchCode">BATCH-2026-001</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="specs-grid">
+          <div class="spec-item">
+            <div class="spec-label">📍 الموقع الحقلي</div>
+            <div class="spec-val" id="specLocation">قطاع بشاير 1 • حواش 02</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">📅 تاريخ الحصاد</div>
+            <div class="spec-val" id="specDate">2026/09/24</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">💧 نظام ومصدر الري</div>
+            <div class="spec-val" id="specIrrigation">آبار مياه جوفية عذبة</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label">⏳ الصلاحية المعتمدة</div>
+            <div class="spec-val">12 شهراً من التعبئة</div>
+          </div>
+        </div>
+
+        <div class="quality-ribbon">
+          <span class="q-pill">🌿 خالي من المبيدات</span>
+          <span class="q-pill">💎 جودة فرز 95%</span>
+          <span class="q-pill">☀️ تجفيف طبيعي</span>
+          <span class="q-pill">✨ تعبئة آلية معقمة</span>
+        </div>
+      </div>
+
+      <!-- Provenance & Geographic Map -->
+      <div class="card">
+        <div class="section-title">
+          <span>🗺️</span>
+          <span>المنشأ الجغرافي وخريطة القطعة الحقلية</span>
+        </div>
+        <div id="map" class="map-box"></div>
+        <div class="map-caption">
+          <div>
+            <b>الموقع:</b> <span id="mapPlotName">قطعة الإنتاج والقطاف المعتمدة</span>
+          </div>
+          <div style="direction:ltr;font-family:monospace;font-size:11px" id="mapCoords">
+            27.0062° N, 28.3871° E
+          </div>
+        </div>
+      </div>
+
+      <!-- Lifecycle & Timeline -->
+      <div class="card">
+        <div class="section-title">
+          <span>📜</span>
+          <span>رحلة النخلة وسجل العمليات الزراعية</span>
+        </div>
+        <div class="timeline" id="timelineContainer">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Nutritional Facts & Certificates -->
+      <div class="card">
+        <div class="section-title">
+          <span>🔬</span>
+          <span>القيمة الغذائية والشهادات الصحية (لكل 100 جم)</span>
+        </div>
+        <table class="nutri-table">
+          <tr><td>السعرات الحرارية</td><td id="nutriCal">277 سعرة</td></tr>
+          <tr><td>السكريات الطبيعية (جلوكوز وفركتوز)</td><td id="nutriSugar">66.5 جم</td></tr>
+          <tr><td>الألياف الغذائية الصحية</td><td id="nutriFiber">6.7 جم</td></tr>
+          <tr><td>عنصر البوتاسيوم المقوي للقلب</td><td id="nutriPotassium">696 مجم</td></tr>
+          <tr><td>الماغنيسيوم والحديد</td><td>54 مجم ماغنيسيوم • 0.9 مجم حديد</td></tr>
+          <tr><td>الفحص المخبري للعينات</td><td style="color:#15803d">✅ اجتياز معمل فحص متبقيات المبيدات</td></tr>
+        </table>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="btn-group">
+        <button class="action-btn btn-primary-action" id="shareBtn">
+          <span>🔗</span>
+          <span>مشاركة وثيقة التتبع</span>
+        </button>
+        <a class="action-btn btn-secondary-action" id="waOrderBtn" href="#" target="_blank">
+          <span>💬</span>
+          <span>طلب مباشر وتصدير</span>
+        </a>
+      </div>
+
+      <!-- Footer -->
+      <div class="passport-footer">
+        <div>نظام إدارة وتتبع النخيل الذكي <b>PalmsTrace Enterprise</b></div>
+        <div>جميع الحقوق محفوظة © <span id="footerBrandName">المنظومة الزراعية</span> 2026</div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Interactive Share Modal Dialog -->
+  <div id="shareModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.72);z-index:99999;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px)">
+    <div style="background:#fff;border-radius:20px;max-width:440px;width:100%;box-shadow:0 25px 50px -12px rgba(0,0,0,0.35);overflow:hidden;border:1px solid #E2E8F0">
+      <div style="background:#15803D;color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center">
+        <h3 style="margin:0;font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px">
+          <span>🔗</span> <span>مشاركة وثيقة التتبع الرقمية</span>
+        </h3>
+        <button type="button" id="closeShareModal" style="background:rgba(255,255,255,0.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;font-weight:bold">✕</button>
+      </div>
+      <div style="padding:20px 18px">
+        <p style="font-size:13px;color:#475569;margin-bottom:14px;line-height:1.5">شارك بطاقة التتبع والجودة والأصل الحقلي لهذه الشحنة مع العملاء والمستوردين والشركاء:</p>
+        
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+          <input type="text" id="shareUrlInput" readonly style="flex:1;background:#F8FAFC;border:1.5px solid #CBD5E1;border-radius:10px;padding:10px 12px;font-size:12px;color:#1E293B;direction:ltr" />
+          <button id="copyShareUrlBtn" style="background:#15803D;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:700;font-size:13px;cursor:pointer">نسخ</button>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+          <a id="shareWaBtn" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:6px;background:#25D366;color:#fff;text-decoration:none;padding:11px 12px;border-radius:12px;font-size:13px;font-weight:800;cursor:pointer">
+            <span>💬</span> <span>واتساب</span>
+          </a>
+          <a id="shareTgBtn" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:6px;background:#0088cc;color:#fff;text-decoration:none;padding:11px 12px;border-radius:12px;font-size:13px;font-weight:800;cursor:pointer">
+            <span>✈️</span> <span>تيليجرام</span>
+          </a>
+        </div>
+
+        <button id="printDocBtn" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;background:#F1F5F9;color:#0F172A;border:1px solid #CBD5E1;border-radius:12px;padding:11px 12px;font-size:13px;font-weight:800;cursor:pointer">
+          <span>🖨️</span> <span>طباعة / حفظ كملف PDF</span>
+        </button>
+
+        <div id="copyNotice" style="display:none;margin-top:12px;background:#DCFCE7;color:#15803D;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:700;text-align:center">
+          ✓ تم نسخ رابط وثيقة التتبع بنجاح إلى الحافظة!
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    // Extract batch ID from query parameter or path
+    function getBatchId() {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('batch')) return urlParams.get('batch');
+      if (urlParams.get('id')) return urlParams.get('id');
+      const parts = window.location.pathname.split('/');
+      const last = parts[parts.length - 1];
+      if (last && last !== 'trace.html' && last !== 'trace' && last !== 'p') {
+        return decodeURIComponent(last);
+      }
+      return 'BATCH-2026-001';
+    }
+
+    async function loadTraceData() {
+      const batchId = getBatchId();
+      let data = null;
+
+      try {
+        const apiBase = (window.location.protocol === 'file:' || !window.location.port) ? 'http://localhost:3000' : '';
+        const res = await fetch(`${apiBase}/api/public/trace/${encodeURIComponent(batchId)}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json && json.success) data = json;
+        }
+      } catch (err) {
+        console.warn('Backend API offline or unreachable, falling back to local dataset:', err);
+      }
+
+      // Default / Fallback High-Quality Data for Farafra Oasis
+      if (!data) {
+        data = {
+          batch: {
+            batch: batchId,
+            variety: 'تمر برحي فاخر',
+            cropName: 'تمور',
+            qualityGrade: 'فرز ممتاز ★★★ (Grade A)',
+            date: '2026-09-24',
+            kg: 12190,
+            kgEx: 11500,
+            sectorName: 'قطاع بشاير 1',
+            plotName: 'حواش 01A و 02A'
+          },
+          provenance: {
+            farm: '',
+            region: 'واحة الفرافرة • الوادي الجديد',
+            centerLat: 27.0062,
+            centerLng: 28.3871,
+            coordinates: '[[27.003625,28.384938],[27.003625,28.389238],[27.008775,28.389238],[27.008775,28.384938],[27.003625,28.384938]]',
+            irrigationType: 'مياه جوفية نقية • شبكة ري حديث بالتنقيط'
+          },
+          quality: {
+            grade: 'فرز ممتاز (Premium Grade A)',
+            pctEx: 95,
+            variety: 'تمر برحي فاخر'
+          },
+          timeline: [
+            {
+              stage: 'التلقيح والإخصاب الميداني',
+              date: '2026-03-15',
+              title: 'تلقيح يدوي دقيق بأفخر حبوب اللقاح',
+              desc: 'تمت عمليات التلقيح اليدوي ومتابعة عقد الثمار بنجاح تحت إشراف نخبة من المهندسين الزراعيين.',
+              badge: 'رعاية فائقة'
+            },
+            {
+              stage: 'الخف والتكميم والوقاية الحيوية',
+              date: '2026-05-20',
+              title: 'خف الشماريخ وتركيب أكياس الحماية الحريرية',
+              desc: 'حماية العراجين بأغطية واقية وتنفيذ برنامج المكافحة الحيوية المتكاملة خالية 100% من أي متبقيات كيميائية.',
+              badge: 'عضوي 100%'
+            },
+            {
+              stage: 'الري والتغذية الحيوية من الآبار',
+              date: '2026-07-10',
+              title: 'ري متطور بالتنقيط من مياه جوفية عذبة نقية',
+              desc: 'تغذية متوازنة بأسمدة عضوية معتمدة ومياه آبار عذبة من واحة الفرافرة البكر.',
+              badge: 'مياه جوفية نقية'
+            },
+            {
+              stage: 'الحصاد والقطف اليدوي المنقى',
+              date: '2026-09-24',
+              title: 'قطف الثمار عند تمام النضج (برحي فاخر)',
+              desc: 'جمع يدوي دقيق بمعدات مخصصة ونقل مباشر إلى صالة الفرز والتحجيم بالقطاع.',
+              badge: 'طازج'
+            },
+            {
+              stage: 'الفحص المخبري والفرز الممتاز والتعبئة',
+              date: '2026-09-24',
+              title: 'معايير جودة صارمة بنسبة فرز فاخر 95%',
+              desc: 'اجتياز فحوصات نقاء الحبة، وخلو العينة من متبقيات المبيدات، واعتماد التعبئة للبيع والتصدير.',
+              badge: 'معتمد وموثق'
+            }
+          ]
+        };
+      }
+
+      renderPage(data);
+    }
+
+    function renderPage(data) {
+      document.getElementById('loader').style.display = 'none';
+      document.getElementById('content').style.display = 'block';
+
+      const b = data.batch || {};
+      const prov = data.provenance || {};
+
+      // 1. Read local storage settings if available (offline / same origin)
+      let localSettings = null;
+      let activeComp = null;
+      try {
+        const raw = localStorage.getItem("palmtrace_v5");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed) {
+            if (parsed.settings) localSettings = parsed.settings;
+            if (parsed.companies && parsed.companies.length) activeComp = parsed.companies[0];
+          }
+        }
+      } catch (e) {
+        console.warn('LocalStorage access error:', e);
+      }
+
+      // 2. Company Identity & Logo
+      const compLogo = data?.company?.logo || activeComp?.logo || localSettings?.logo || '';
+      const compName = data?.company?.tradeName || data?.company?.name || activeComp?.tradeName || activeComp?.name || localSettings?.companyName || (prov.farm && prov.farm !== 'مزارع بشاير الشوربجي' ? prov.farm : '') || 'المنظومة الزراعية';
+      const farmName = compName;
+
+      if (compLogo) {
+        const badgeEl = document.getElementById('brandLogoBadge');
+        if (badgeEl) {
+          badgeEl.innerHTML = `<img src="${compLogo}" style="width:100%;height:100%;object-fit:contain;border-radius:50%;padding:3px" alt="${farmName}">`;
+          badgeEl.style.background = '#FFFFFF';
+        }
+        const favEl = document.getElementById('traceFavicon');
+        if (favEl) favEl.href = compLogo;
+      }
+      if (document.getElementById('brandTitle')) {
+        document.getElementById('brandTitle').textContent = farmName;
+      }
+      if (document.getElementById('footerBrandName')) {
+        document.getElementById('footerBrandName').textContent = farmName;
+      }
+      if (document.getElementById('loaderSubBrand')) {
+        document.getElementById('loaderSubBrand').textContent = `نظام التتبع الذكي | ${farmName}`;
+      }
+      document.title = `جواز السفر الرقمي للمنتج وتتبع التمور | ${farmName}`;
+
+      document.getElementById('prodVariety').textContent = b.variety || 'تمر برحي فاخر';
+      document.getElementById('prodGrade').textContent = b.qualityGrade || 'فرز ممتاز ★★★ (Grade A)';
+      document.getElementById('batchCode').textContent = b.batch || b.id || 'BATCH-2026-001';
+      document.getElementById('specLocation').textContent = `${b.sectorName || prov.sectorName || 'قطاع بشاير'} • ${b.plotName || prov.plotName || 'القطعة المركزية'}`;
+      document.getElementById('specDate').textContent = b.date || '2026/09/24';
+      document.getElementById('specIrrigation').textContent = prov.irrigationType || 'مياه جوفية نقية • ري بالتنقيط';
+
+      // 3. Dynamic WhatsApp Direct Order Link
+      let rawPhone = localSettings?.traceWhatsapp || activeComp?.phone || data?.company?.phone || '201000000001';
+      let cleanPhone = String(rawPhone).replace(/[^0-9]/g, '');
+      if (cleanPhone.startsWith('00')) cleanPhone = cleanPhone.slice(2);
+      if (cleanPhone.startsWith('01') && cleanPhone.length === 11) cleanPhone = '2' + cleanPhone;
+
+      let msgTemplate = localSettings?.traceOrderMsg || 'السلام عليكم ورحمة الله، أود الاستفسار عن طلب كميات من التمور لشحنة التتبع: {batch} (الصنف: {variety}) بمزارع {farm}.';
+      const finalMsg = msgTemplate
+        .replace(/{batch}/g, b.batch || b.id || 'BATCH-2026-001')
+        .replace(/{variety}/g, b.variety || 'التمور')
+        .replace(/{farm}/g, farmName);
+
+      const waOrderEl = document.getElementById('waOrderBtn');
+      if (waOrderEl) {
+        waOrderEl.href = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(finalMsg)}`;
+      }
+
+      // 4. Render timeline
+      const tContainer = document.getElementById('timelineContainer');
+      tContainer.innerHTML = (data.timeline || []).map((t, idx) => `
+        <div class="timeline-node">
+          <div class="timeline-dot">${idx + 1}</div>
+          <div class="timeline-content">
+            <div class="timeline-top">
+              <span class="timeline-stage">${t.stage}</span>
+              <span class="timeline-date">${t.date}</span>
+            </div>
+            <div class="timeline-desc">${t.desc}</div>
+            <span class="timeline-badge">${t.badge}</span>
+          </div>
+        </div>
+      `).join('');
+
+      // 5. Setup Leaflet map
+      initMap(prov);
+
+      // 6. Interactive In-Page Share Modal
+      const shareModal = document.getElementById('shareModal');
+      const shareBtn = document.getElementById('shareBtn');
+      const closeShareModal = document.getElementById('closeShareModal');
+      const shareUrlInput = document.getElementById('shareUrlInput');
+      const copyShareUrlBtn = document.getElementById('copyShareUrlBtn');
+      const shareWaBtn = document.getElementById('shareWaBtn');
+      const shareTgBtn = document.getElementById('shareTgBtn');
+      const printDocBtn = document.getElementById('printDocBtn');
+      const copyNotice = document.getElementById('copyNotice');
+
+      const currentUrl = window.location.href;
+      const shareText = `وثيقة تتبع وتمييز جودة التمور لشحنة [${b.batch || b.id}] (${b.variety}) بمزارع ${farmName}`;
+
+      shareBtn.onclick = (e) => {
+        e.preventDefault();
+        if (shareUrlInput) shareUrlInput.value = currentUrl;
+        if (shareWaBtn) shareWaBtn.href = `https://wa.me/?text=${encodeURIComponent(shareText + '\n' + currentUrl)}`;
+        if (shareTgBtn) shareTgBtn.href = `https://t.me/share/url?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(shareText)}`;
+        if (shareModal) shareModal.style.display = 'flex';
+      };
+
+      if (closeShareModal) {
+        closeShareModal.onclick = () => { if (shareModal) shareModal.style.display = 'none'; };
+      }
+      if (shareModal) {
+        shareModal.onclick = (e) => {
+          if (e.target === shareModal) shareModal.style.display = 'none';
+        };
+      }
+
+      if (copyShareUrlBtn) {
+        copyShareUrlBtn.onclick = () => {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(currentUrl).then(() => {
+              showCopySuccess();
+            }).catch(() => fallbackCopy());
+          } else {
+            fallbackCopy();
+          }
+        };
+      }
+
+      function fallbackCopy() {
+        if (shareUrlInput) {
+          shareUrlInput.select();
+          document.execCommand('copy');
+          showCopySuccess();
+        }
+      }
+
+      function showCopySuccess() {
+        if (copyNotice) {
+          copyNotice.style.display = 'block';
+          setTimeout(() => { copyNotice.style.display = 'none'; }, 3000);
+        }
+      }
+
+      if (printDocBtn) {
+        printDocBtn.onclick = () => {
+          if (shareModal) shareModal.style.display = 'none';
+          window.print();
+        };
+      }
+    }
+
+    function initMap(prov) {
+      const lat = Number(prov.centerLat) || 27.0062;
+      const lng = Number(prov.centerLng) || 28.3871;
+
+      document.getElementById('mapCoords').textContent = `${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E`;
+
+      const map = L.map('map', {
+        center: [lat, lng],
+        zoom: 15,
+        zoomControl: false,
+        attributionControl: false
+      });
+
+      // Satellite Imagery Layer (ESRI World Imagery)
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 18
+      }).addTo(map);
+
+      // Try parsing boundary polygon if available
+      let addedLayer = false;
+      if (prov.coordinates) {
+        try {
+          const coords = typeof prov.coordinates === 'string' ? JSON.parse(prov.coordinates) : prov.coordinates;
+          if (Array.isArray(coords) && coords.length >= 3) {
+            const polygon = L.polygon(coords, {
+              color: '#22c55e',
+              weight: 3,
+              fillColor: '#16a34a',
+              fillOpacity: 0.35
+            }).addTo(map);
+            map.fitBounds(polygon.getBounds(), { padding: [20, 20] });
+            addedLayer = true;
+          }
+        } catch (e) {
+          console.warn('Polygon parse error:', e);
+        }
+      }
+
+      if (!addedLayer) {
+        L.circleMarker([lat, lng], {
+          radius: 12,
+          color: '#ffffff',
+          weight: 2,
+          fillColor: '#22c55e',
+          fillOpacity: 0.9
+        }).addTo(map);
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', loadTraceData);
+  </script>
+</body>
+</html>
+

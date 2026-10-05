@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Local data (database, backups, generated exports, mail log)
+backend/data/
+exports/
+*.db
+*.db-wal
+*.db-shm
+*.db.bak
+*.backup_*
+
+# Secrets
+.env
+
+# Archives & logs
+*.zip
+*.rar
+*.7z
+*.log
+npm-debug.log*
+
+# OS / editor
+Thumbs.db
+.DS_Store
+__pycache__/
+
+# Business documents kept out of the public repository
+/*.pdf
+/*.docx
+/*.pptx
