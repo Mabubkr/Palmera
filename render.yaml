@@ -1,6 +1,7 @@
 # Render Blueprint: New → Blueprint → pick this repository.
 # Free plan: the server sleeps after ~15 minutes without visitors and its disk is wiped on every
-# restart, so the demo farm is re-created at each start (SEED_DEMO_DATA=true). For data that must
+# restart, so the demo farm is re-created at each start (SEED_DEMO_DATA=true) from the anonymised
+# farm copy backend/seeds/demo-farm.db.gz (falls back to a tiny sample farm without it). For data that must
 # survive, use a paid plan with a disk mounted at /var/data and set DATA_DIR=/var/data.
 services:
   - type: web

@@ -15,6 +15,7 @@ async function startServer({ demo = true } = {}) {
     DATA_DIR: dir,
     PORT: String(port),
     SEED_DEMO_DATA: demo ? 'true' : 'false',
+    DEMO_SNAPSHOT: 'false', // tests use the small built-in sample farm
     GEMINI_API_KEY: '',
     LOG_RESET_LINKS: 'true'
   };
